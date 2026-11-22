@@ -1,0 +1,67 @@
+# Wydanie: wypchnij tag, np.  git tag v1.3.1  &&  git push origin v1.3.1
+# Workflow zbuduje klienta i instalator (Windows) oraz instalator serwera (Linux)
+# i dołączy pliki do wydania na GitHubie. Klienci zaktualizują się z poziomu programu.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Wersja z tagu
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Budowanie klienta
+        run: >
+          dotnet publish Client/VoiceClient.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none
+          -p:Version=${{ env.VERSION }} -o dist/client
+
+      - name: Instalacja Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Budowanie instalatora
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=${{ env.VERSION }} Installer\Voxly.iss'
+
+      - name: Suma kontrolna SHA-256
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash dist/Voxly-Setup.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  Voxly-Setup.exe" | Out-File -FilePath dist/Voxly-Setup.exe.sha256 -Encoding ascii
+
+      - name: Publikacja wydania
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Voxly-Setup.exe
+            dist/Voxly-Setup.exe.sha256
+          generate_release_notes: true
+
+  linux:
+    needs: windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalator serwera
+        run: bash make-linux-installer.sh
+
+      - name: Dołączenie do wydania
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/voxly-server-install.sh
+            dist/Voxly-Server-linux.tar.gz
