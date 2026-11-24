@@ -1,0 +1,12 @@
+bin/
+obj/
+dist/
+.vs/
+*.user
+
+# pliki robocze serwera i klienta (hasła, rejestr klientów) - nigdy nie wrzucaj ich do repozytorium
+config.json
+clients.json
+channels.json
+ranks.json
+settings.json
