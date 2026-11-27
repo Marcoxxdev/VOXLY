@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>   <!-- tylko dla ikony w zasobniku (NotifyIcon) -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Voxly</AssemblyName>
+    <RootNamespace>VoiceClient</RootNamespace>
+    <Product>VOXLY</Product>
+    <ApplicationIcon>Assets\voxly.ico</ApplicationIcon>
+    <Authors>Marcoxxdev</Authors>
+    <Company>Marcoxxdev</Company>
+    <Version>1.9.5</Version>
+    <NoWarn>CS0618</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LiteNetLib" Version="1.2.0" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="Concentus" Version="2.2.2" />
+    <Compile Include="..\Shared\Protocol.cs" Link="Protocol.cs" />
+    <Resource Include="Assets\voxly.png" />
+    <Resource Include="Assets\voxly.ico" />
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Resource Include="Assets\Avatars\*.png" />
+    <!-- repozytorium GitHub używane do aktualizacji z poziomu programu: ZMIEŃ na swoje (konto/repozytorium) -->
+    <AssemblyMetadata Include="GitHubRepo" Value="Marcoxxdev/VOXLY" />
+  </ItemGroup>
+</Project>
